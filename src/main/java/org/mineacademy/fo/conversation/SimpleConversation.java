@@ -72,7 +72,7 @@ public abstract class SimpleConversation implements ConversationAbandonedListene
 		final CustomConversation conversation = new CustomConversation(player);
 		final CustomCanceller canceller = new CustomCanceller();
 
-		canceller.setConversation(conversation);
+		canceller.setConversation(conversation, player);
 
 		conversation.getCancellers().add(canceller);
 		conversation.getCancellers().add(this.getCanceller());
@@ -293,6 +293,7 @@ public abstract class SimpleConversation implements ConversationAbandonedListene
 
 
         ScheduledTask task;
+		Player player;
 		/**
 		 */
 		public CustomCanceller() {
@@ -305,8 +306,14 @@ public abstract class SimpleConversation implements ConversationAbandonedListene
 			this.startTimer();
 		}
 
+		public void setConversation(@NotNull Conversation conversation, Player player) {
+			this.conversation = conversation;
+			this.player = player;
+			this.startTimer();
+		}
+
         private void startTimer() {
-            task = SimplePlugin.getScheduler().globalRegionalScheduler().runDelayed(() -> {
+            task = SimplePlugin.getScheduler().regionSpecificScheduler(player.getLocation()).runDelayed(() -> {
                 if (CustomCanceller.this.conversation.getState() == Conversation.ConversationState.UNSTARTED) {
                     CustomCanceller.this.startTimer();
                 } else if (CustomCanceller.this.conversation.getState() == Conversation.ConversationState.STARTED) {
