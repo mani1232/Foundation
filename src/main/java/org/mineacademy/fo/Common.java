@@ -1286,7 +1286,7 @@ public final class Common {
 	 * @param message
 	 */
 	public static void warning(String message) {
-		log("&cWarning: &f" + message);
+		log("&cWarning: &7" + message);
 	}
 
 	/**

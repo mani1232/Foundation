@@ -357,18 +357,24 @@ public class AnimationUtil {
 	 * @return The repeating BukkitTask (Useful to cancel on reload or shutdown).
 	 */
 	public static ScheduledTask animateItemTitle(ItemStack item, List<String> animatedFrames, long delay, long period) {
-		AtomicInteger frame = new AtomicInteger();
 		return SimplePlugin.getScheduler().globalRegionalScheduler().runAtFixedRate(() -> {
-			final ItemMeta meta = checkMeta(item);
+			if (!Remain.hasItemMeta()) {
+					this.cancel();
 
-			meta.setDisplayName(animatedFrames.get(frame.get()));
-			item.setItemMeta(meta);
+					return;
+				}
 
-			frame.incrementAndGet();
-			if (frame.get() > animatedFrames.size())
-				frame.set(0);
+				final ItemMeta meta = checkMeta(item);
+
+				meta.setDisplayName(animatedFrames.get(this.frame));
+				item.setItemMeta(meta);
+
+				this.frame++;
+				if (this.frame > animatedFrames.size())
+					this.frame = 0;
 		},delay, period);
 	}
+}
 
 	/**
 	 * @param item           The item to be animated.
@@ -381,25 +387,32 @@ public class AnimationUtil {
 	 *                                   ({@code line < 0 || line > lore.size()})
 	 */
 	public static ScheduledTask animateItemLore(ItemStack item, int line, List<String> animatedFrames, long delay, long period) {
-		AtomicInteger frame = new AtomicInteger();
 		return SimplePlugin.getScheduler().globalRegionalScheduler().runAtFixedRate(() -> {
-			final String frameText = animatedFrames.get(frame.get() % animatedFrames.size());
-			final ItemMeta meta = checkMeta(item);
-			List<String> lore = meta.getLore();
-			if (lore == null)
-				lore = new ArrayList<>(); // prevents NPE
+			
+				if (!Remain.hasItemMeta()) {
+					this.cancel();
 
-			if (lore.size() < line)
-				throw new IndexOutOfBoundsException("line #" + line + " is out of range!");
+					return;
+				}
 
-			lore.set(line, frameText); // update line
+				final String frameText = animatedFrames.get(this.frame % animatedFrames.size());
+				final ItemMeta meta = checkMeta(item);
+				List<String> lore = meta.getLore();
+				if (lore == null)
+					lore = new ArrayList<>(); // prevents NPE
 
-			meta.setLore(lore);
-			item.setItemMeta(meta);
+				if (lore.size() < line)
+					throw new IndexOutOfBoundsException("line #" + line + " is out of range!");
 
-			frame.incrementAndGet();
-			if (frame.get() > animatedFrames.size())
-				frame.set(0);
+				lore.set(line, frameText); // update line
+
+				meta.setLore(lore);
+				item.setItemMeta(meta);
+
+				this.frame++;
+				if (this.frame > animatedFrames.size())
+					this.frame = 0;
+			}
 		},delay, period);
 	}
 

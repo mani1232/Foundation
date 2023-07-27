@@ -430,7 +430,7 @@ public abstract class Menu {
 		this.compileItems().forEach((slot, item) -> drawer.setItem(slot, item));
 
 		// Allow last minute modifications
-		this.onDisplay(drawer);
+		this.onPreDisplay(drawer);
 
 		// Render empty slots as slot numbers if enabled
 		this.debugSlotNumbers(drawer);
@@ -472,6 +472,7 @@ public abstract class Menu {
 			player.setMetadata(FoConstants.NBT.TAG_MENU_CURRENT, new FixedMetadataValue(SimplePlugin.getInstance(), Menu.this));
 
 			this.opened = true;
+			this.onPostDisplay(player);
 		});
 	}
 
@@ -500,7 +501,15 @@ public abstract class Menu {
 	 *
 	 * @param drawer the drawer
 	 */
-	protected void onDisplay(final InventoryDrawer drawer) {
+	protected void onPreDisplay(final InventoryDrawer drawer) {
+	}
+
+	/**
+	 * Called automatically after the menu is displayed to the viewer
+	 *
+	 * @param viewer
+	 */
+	protected void onPostDisplay(final Player viewer) {
 	}
 
 	/**
@@ -710,6 +719,7 @@ public abstract class Menu {
 	 * @param task
 	 */
 	protected final void animate(int periodTicks, MenuRunnable task) {
+    Valid.checkNotNull(this.viewer, "Cannot call animate() before the menu is shown, call your method in onDisplay() method instead.");
 		SimplePlugin.getScheduler().globalRegionalScheduler().runAtFixedRate(scheduledTask -> this.wrapAnimation(task, scheduledTask), 2, 1);
 	}
 
@@ -723,6 +733,7 @@ public abstract class Menu {
 	 * @param task
 	 */
 	protected final void animateAsync(int periodTicks, MenuRunnable task) {
+    Valid.checkNotNull(this.viewer, "Cannot call animate() before the menu is shown, call your method in onDisplay() method instead.");
 		SimplePlugin.getScheduler().asyncScheduler().runAtFixedRate(scheduledTask -> this.wrapAnimation(task, scheduledTask), Duration.ofMillis(2), Duration.ofMillis(1));
 	}
 
