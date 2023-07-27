@@ -67,6 +67,8 @@ import org.mineacademy.fo.visual.BlockVisualizer;
 
 import lombok.Getter;
 import lombok.NonNull;
+import space.arim.morepaperlib.MorePaperLib;
+import space.arim.morepaperlib.scheduling.GracefulScheduling;
 
 /**
  * Represents a basic Java plugin using enhanced library functionality,
@@ -88,6 +90,12 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	 */
 	@Getter
 	private static String version;
+
+	/**
+	 * Scheduler with Folia and Bukkit support
+	 */
+	@Getter
+	private static GracefulScheduling scheduler;
 
 	/**
 	 * Shortcut for getName()
@@ -238,6 +246,9 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 
 		// Load libraries where Spigot does not do this automatically
 		this.loadLibraries();
+
+		// Load scheduler
+		scheduler = new MorePaperLib(instance).scheduling();
 
 		// Call parent
 		this.onPluginLoad();
@@ -397,6 +408,10 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 		// Force add md_5 bungee chat since it's needed
 		if (!ReflectionUtil.isClassAvailable("net.md_5.bungee.api.ChatColor"))
 			libraries.add(Library.fromMavenRepo("net.md-5", "bungeecord-chat", "1.16-R0.4"));
+
+		// Force add scheduler lib
+		if (!ReflectionUtil.isClassAvailable("space.arim.morepaperlib.scheduling.GracefulScheduling"))
+		    libraries.add(Library.fromPath("space.arim.morepaperlib", "morepaperlib", "0.4.2", "https://mvn-repo.arim.space/lesser-gpl3/space/arim/morepaperlib/morepaperlib/0.4.2/morepaperlib-0.4.2.jar"));
 
 		if (MinecraftVersion.olderThan(V.v1_16)) {
 			final YamlConfiguration pluginFile = new YamlConfiguration();
@@ -895,7 +910,8 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 		this.getServer().getMessenger().unregisterIncomingPluginChannel(this);
 		this.getServer().getMessenger().unregisterOutgoingPluginChannel(this);
 
-		this.getServer().getScheduler().cancelTasks(this);
+		scheduler.cancelGlobalTasks();
+		//this.getServer().getScheduler().cancelTasks(this);
 
 		this.mainCommand = null;
 	}

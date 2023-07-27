@@ -461,7 +461,6 @@ public class YamlConfig extends FileConfig {
 
 		public YamlConstructor() {
 			super();
-
 			this.yamlConstructors.put(Tag.MAP, new ConstructCustomObject());
 		}
 
@@ -511,7 +510,6 @@ public class YamlConfig extends FileConfig {
 
 		public YamlRepresenter() {
 			super();
-
 			this.multiRepresenters.put(ConfigurationSerializable.class, new RepresentConfigurationSerializable());
 			this.multiRepresenters.put(ConfigSection.class, new RepresentConfigurationSection());
 			this.multiRepresenters.remove(Enum.class);

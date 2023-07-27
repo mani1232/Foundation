@@ -12,6 +12,7 @@ import org.bukkit.conversations.ConversationPrefix;
 import org.bukkit.conversations.InactivityConversationCanceller;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.mineacademy.fo.Common;
 import org.mineacademy.fo.Messenger;
 import org.mineacademy.fo.Valid;
@@ -25,6 +26,7 @@ import org.mineacademy.fo.settings.SimpleLocalization;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import space.arim.morepaperlib.scheduling.ScheduledTask;
 
 /**
  * A simple way to communicate with the player
@@ -71,7 +73,7 @@ public abstract class SimpleConversation implements ConversationAbandonedListene
 		final CustomConversation conversation = new CustomConversation(player);
 		final CustomCanceller canceller = new CustomCanceller();
 
-		canceller.setConversation(conversation);
+		canceller.setConversation(conversation, player);
 
 		conversation.getCancellers().add(canceller);
 		conversation.getCancellers().add(this.getCanceller());
@@ -290,11 +292,50 @@ public abstract class SimpleConversation implements ConversationAbandonedListene
 
 	private final class CustomCanceller extends InactivityConversationCanceller {
 
+
+        ScheduledTask task;
+		Player player;
 		/**
 		 */
 		public CustomCanceller() {
 			super(SimplePlugin.getInstance(), SimpleConversation.this.getTimeout());
 		}
+
+		@Override
+		public void setConversation(@NotNull Conversation conversation) {
+			this.conversation = conversation;
+			this.startTimer();
+		}
+
+		public void setConversation(@NotNull Conversation conversation, Player player) {
+			this.conversation = conversation;
+			this.player = player;
+			this.startTimer();
+		}
+
+        private void startTimer() {
+            task = SimplePlugin.getScheduler().regionSpecificScheduler(player.getLocation()).runDelayed(() -> {
+                if (CustomCanceller.this.conversation.getState() == Conversation.ConversationState.UNSTARTED) {
+                    CustomCanceller.this.startTimer();
+                } else if (CustomCanceller.this.conversation.getState() == Conversation.ConversationState.STARTED) {
+                    CustomCanceller.this.cancelling(CustomCanceller.this.conversation);
+                    CustomCanceller.this.conversation.abandon(new ConversationAbandonedEvent(CustomCanceller.this.conversation, CustomCanceller.this));
+                }
+            }, this.timeoutSeconds * 20L);
+        }
+
+		@Override
+		public boolean cancelBasedOnInput(@NotNull ConversationContext context, @NotNull String input) {
+            this.stopTimer();
+            this.startTimer();
+            return false;
+		}
+
+        private void stopTimer() {
+            if (!this.task.isCancelled()) {
+                task.cancel();
+            }
+        }
 
 		/**
 		 * @see org.bukkit.conversations.InactivityConversationCanceller#cancelling(org.bukkit.conversations.Conversation)

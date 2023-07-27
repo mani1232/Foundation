@@ -30,6 +30,14 @@
 			<id>spigot-repo</id>
 			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots</url>
 		</repository>
+        <repository>
+			<id>projectlombok.org</id>
+			<url>https://projectlombok.org/edge-releases</url>
+		</repository>
+		<repository>
+			<id>arim-mvn-lgpl3</id>
+			<url>https://mvn-repo.arim.space/lesser-gpl3/</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
@@ -63,6 +71,13 @@
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
 			<version>1.20.1-R0.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- The lib for support new scheduler -->
+		<dependency>
+			<groupId>space.arim.morepaperlib</groupId>
+			<artifactId>morepaperlib</artifactId>
+			<version>0.4.2</version>
 		</dependency>
 
 		<!-- MineAcademy guaranteed availability repos for plugins -->
